@@ -7,21 +7,36 @@ from gremllm import Gremllm as Gremlin
 from rich import print
 from rich.prompt import Prompt
 
-model_version = 'anthropic/claude-3-5-sonnet-20241022'
+model_version = "anthropic/claude-3-5-sonnet-20241022"
 
 app = typer.Typer(add_completion=False)
 
 @app.command()
+def play_text_adventure(game_description: str):
+    color = "green"
+    game = Gremlin(f"text adventure with description: {game_description}", model=model_version)
+    description = game.description()
+    while True:
+        cmd = Prompt.ask(prompt(f"[{color}]{description}[/{color}]"))
+        if cmd == "quit":
+            print("exiting game")
+            break
+        print(f"thinking...")
+        description = game.next_state(cmd)
+
+
+@app.command()
 def start_conversation(person: str):
+    color = "red"
     person = Gremlin(person, model=model_version)
     name = person.name
-    answer = f"{name}: What is your question?"    
+    answer = f"[{color}]{name}[/{color}]: What is your question?"
     while True:
         question = Prompt.ask(prompt(answer))
-        if question == 'quit':
+        if question == "quit":
             print("good bye")
             break
-        print(f"{name} is thinking...")
+        print(f"[{color}]{name}[/{color}] is thinking...")
         answer = person.answer_question(question)
     
 
